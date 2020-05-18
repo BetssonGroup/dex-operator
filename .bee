@@ -1,0 +1,11 @@
+Parent: &parent Bumblebee
+Builds:
+  Teamcity:
+    Server: teamcity.lab.techops-test.euc1.betsson.tech
+    # Token: <my token here> # Use env vars
+    ParentProject: *parent
+    Project:
+      Name: dex-operator
+      Description: Dex Operator
+      VCSRoot: GenericGitSsh
+      Repo: ssh://git@edgecharlie.corpsson.com:7999/iac/dex-operator.git
