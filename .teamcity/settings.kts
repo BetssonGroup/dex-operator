@@ -21,6 +21,8 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 (Plugins -> teamcity-configs -> teamcity-configs:generate), the
 'Debug' option is available in the context menu for the task.
 */
+import jetbrains.buildServer.configs.kotlin.v2019_2.*
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
 version = "2019.2"
 
@@ -43,7 +45,7 @@ object BuildDocker : BuildType({
     vcs { root(AbsoluteId("GenericGitSsh"))}
     steps {
         script {
-            name = "Docker Build and Pushild"
+            name = "Docker Build and Push"
             workingDir = "."
             scriptContent = "make IMG=localhost:5000/dex-operator:v0.1.0 docker-build docker-push"
         }
