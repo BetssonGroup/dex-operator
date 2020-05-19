@@ -3,7 +3,7 @@ kind: Client
 metadata:
   name: test-minimal-client
 spec:
-  Name: test minimal client
-  Secret: 33559e7361087368bdac8e93f889c963d2c29399
+  name: test minimal client
+  secret: 33559e7361087368bdac8e93f889c963d2c29399
   redirectURIs:
     - https://www.dn.se/auth

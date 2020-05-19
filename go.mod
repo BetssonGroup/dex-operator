@@ -1,4 +1,4 @@
-module bitbucketsson.betsson.local/scm/iac/dex-operator
+module github.com/BetssonGroup/dex-operator
 
 go 1.13
 

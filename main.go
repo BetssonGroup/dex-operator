@@ -1,5 +1,5 @@
 /*
-
+Copyright 2020 Betsson Group.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	oauth2v1 "bitbucketsson.betsson.local/scm/iac/dex-operator/api/v1"
-	"bitbucketsson.betsson.local/scm/iac/dex-operator/controllers"
-	dexapi "bitbucketsson.betsson.local/scm/iac/dex-operator/pkg/dex"
+	oauth2v1 "github.com/BetssonGroup/dex-operator/api/v1"
+	"github.com/BetssonGroup/dex-operator/controllers"
+	dexapi "github.com/BetssonGroup/dex-operator/pkg/dex"
 	// +kubebuilder:scaffold:imports
 )
 

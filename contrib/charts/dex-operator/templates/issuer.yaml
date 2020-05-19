@@ -1,0 +1,9 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: {{ include "dex-operator.fullname" . }}-grpc-cert-issuer
+  labels:
+{{ include "dex-operator.labels" . | indent 4 }}
+spec:
+  ca:
+    secretName: {{ .Values.dexGRPC.ca.secretName }}

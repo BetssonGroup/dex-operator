@@ -41,7 +41,7 @@ type ClientSpec struct {
 	// +optional
 	Public bool `json:"public,omitempty"`
 
-	// Redirect URI's
+	// Redirect URIs
 	RedirectURIs []string `json:"redirectURIs,omitempty"`
 
 	// Trusted Peers

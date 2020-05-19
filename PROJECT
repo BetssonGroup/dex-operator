@@ -1,5 +1,5 @@
 domain: betssongroup.com
-repo: bitbucketsson.betsson.local/scm/iac/dex-operator
+repo: github.com/BetssonGroup/dex-operator
 resources:
 - group: dex
   kind: Client

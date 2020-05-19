@@ -3,9 +3,9 @@ kind: Client
 metadata:
   name: test-client
 spec:
-  Name: test client
-  Secret: 33559e7361087368bdac8e93f889c963d2c29399
-  Public: true
+  name: test client
+  secret: 33559e7361087368bdac8e93f889c963d2c29399
+  public: true
   redirectURIs:
     - https://localhost:1234/auth
     - https://www.dn.se/auth

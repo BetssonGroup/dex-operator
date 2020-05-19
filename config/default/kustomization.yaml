@@ -10,7 +10,8 @@ namePrefix: dex-operator-
 
 # Labels to add to all resources and selectors.
 commonLabels:
-  app: dex-operator
+  app.kubernetes.io/component: controller
+  app.kubernetes.io/name: dex-operator
 
 bases:
 - ../crd

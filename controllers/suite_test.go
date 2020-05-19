@@ -1,5 +1,5 @@
 /*
-
+Copyright 2020 Betsson Group.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	oauth2v1 "bitbucketsson.betsson.local/scm/iac/dex-operator/api/v1"
+	oauth2v1 "github.com/BetssonGroup/dex-operator/api/v1"
 	// +kubebuilder:scaffold:imports
 )
 

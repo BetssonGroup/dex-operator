@@ -47,7 +47,7 @@ object BuildDocker : BuildType({
         script {
             name = "Docker Build and Push"
             workingDir = "."
-            scriptContent = "make IMG=localhost:5000/dex-operator:v0.1.0 docker-build docker-push"
+            scriptContent = "make IMG=quay.io/betsson-oss/dex-operator docker-build docker-push"
         }
     }
     requirements {

@@ -1,5 +1,5 @@
 /*
-
+Copyright 2020 Betsson Group.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
-	oauth2v1 "bitbucketsson.betsson.local/scm/iac/dex-operator/api/v1"
-	dexapi "bitbucketsson.betsson.local/scm/iac/dex-operator/pkg/dex"
+	oauth2v1 "github.com/BetssonGroup/dex-operator/api/v1"
+	dexapi "github.com/BetssonGroup/dex-operator/pkg/dex"
 )
 
 var (

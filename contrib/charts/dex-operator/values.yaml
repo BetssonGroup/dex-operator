@@ -1,0 +1,59 @@
+# Default values for dex-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/betsson-oss/dex-operator
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+crds:
+  create: false # Set to true if CRDS should be installed when using helm template
+
+kubeRbacProxy:
+  enabled: true
+  image:
+    repository: gcr.io/kubebuilder/kube-rbac-proxy
+    tag: v0.5.0
+  port: 8443
+
+# Specify the DEX GRPC endpoint 
+dexGRPC:
+  host: dex
+  port: 35000
+  ca:
+    secretName: dex-grpc-ca # The ca-cert created from the dex chart
+
+resources: 
+  limits:
+    cpu: 200m
+    memory: 60Mi
+  requests:
+    cpu: 200m
+    memory: 60Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

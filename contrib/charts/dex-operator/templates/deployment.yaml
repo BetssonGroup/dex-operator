@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "dex-operator.labels" . | nindent 4 }}
+  name: {{ include "dex-operator.fullname" . }}-controller-manager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      {{- include "dex-operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "dex-operator.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "dex-operator.serviceAccountName" . }}
+      containers:
+      {{- if .Values.kubeRbacProxy.enabled }}
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=10
+        image: "{{ .Values.kubeRbacProxy.image.repository }}:{{ .Values.kubeRbacProxy.image.tag}}"
+        name: kube-rbac-proxy
+        ports:
+          - containerPort: {{ .Values.kubeRbacProxy.port }}
+            name: https
+      {{- end }}
+      - args:
+        - --metrics-addr=127.0.0.1:8080
+        - --enable-leader-election
+        - --dex-grpc={{ .Values.dexGRPC.host }}:{{ .Values.dexGRPC.port }}
+        command:
+        - /manager
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: liveness-port
+        name: manager
+        ports:
+        - containerPort: 9440
+          hostPort: 9440
+          name: liveness-port
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+        - mountPath: /etc/dex/tls
+          name: dex-grpc-client-cert
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: dex-grpc-client-cert
+        secret:
+          defaultMode: 420
+          secretName: {{ template "dex-operator.fullname" . }}-grpc-client-cert
