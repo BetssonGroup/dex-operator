@@ -115,19 +115,23 @@ func (r *ALBAuthReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ingress, err := r.reconcileIngress(ctx, dexv1ALBAuth, dexv1Client)
 	if err != nil {
 		log.Error(err, "unable to reconcile ingress", "client", dexv1Client.Name)
-		return ctrl.Result{}, err
+		if client.IgnoreNotFound(err) == nil {
+			// ingress not found, ignore it
+			dexv1ALBAuth.Status.State = dexv1.PhaseNotFound
+		} else {
+			return ctrl.Result{}, err
+		}
 	}
-
-	// Set status
-	dexv1ALBAuth.Status.Ingress = corev1.ObjectReference{
-		Kind:      ingress.Kind,
-		Namespace: ingress.Namespace,
-		Name:      ingress.Name,
-	}
-	if dexv1ALBAuth.Status.State == dexv1.PhaseDeleting {
+	if dexv1ALBAuth.Status.State == dexv1.PhaseDeleting || dexv1ALBAuth.Status.State == dexv1.PhaseNotFound {
 		// Remove our finalizer since we cleaned up
 		dexv1ALBAuth.ObjectMeta.Finalizers = removeString(dexv1ALBAuth.ObjectMeta.Finalizers, albFinalizer)
 	} else {
+		// Set status, make it active
+		dexv1ALBAuth.Status.Ingress = corev1.ObjectReference{
+			Kind:      ingress.Kind,
+			Namespace: ingress.Namespace,
+			Name:      ingress.Name,
+		}
 		dexv1ALBAuth.Status.State = dexv1.PhaseActive
 	}
 	err = r.Update(ctx, dexv1ALBAuth)
