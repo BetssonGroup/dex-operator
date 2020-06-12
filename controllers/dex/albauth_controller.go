@@ -61,11 +61,13 @@ func (r *ALBAuthReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// examine DeletionTimestamp to determine if object is under deletion
 	if dexv1ALBAuth.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !containsString(dexv1ALBAuth.ObjectMeta.Finalizers, albFinalizer) {
-			// append our finalizer
-			log.Info("Adding alb finalizer")
-			dexv1ALBAuth.ObjectMeta.Finalizers = append(dexv1ALBAuth.ObjectMeta.Finalizers, albFinalizer)
-			if err := r.Update(ctx, dexv1ALBAuth); err != nil {
-				return ctrl.Result{}, err
+			// append our finalizer if state is active
+			if dexv1ALBAuth.Status.State == dexv1.PhaseActive {
+				log.Info("Adding alb finalizer")
+				dexv1ALBAuth.ObjectMeta.Finalizers = append(dexv1ALBAuth.ObjectMeta.Finalizers, albFinalizer)
+				if err := r.Update(ctx, dexv1ALBAuth); err != nil {
+					return ctrl.Result{}, err
+				}
 			}
 		}
 	} else {
@@ -79,7 +81,6 @@ func (r *ALBAuthReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if dexv1ALBAuth.Status.State == dexv1.PhaseActive {
 		return ctrl.Result{}, nil
 	}
-
 	// Get the client
 	dexv1Client := &dexv1.Client{}
 	namespacedClientName := k8stypes.NamespacedName{
@@ -87,11 +88,12 @@ func (r *ALBAuthReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		Namespace: dexv1ALBAuth.Namespace,
 	}
 	if err := r.Get(ctx, namespacedClientName, dexv1Client); err != nil {
-		dexv1ALBAuth.Status.State = dexv1.PhaseNotFound
+		dexv1ALBAuth.Status.State = dexv1.PhaseFailed
 		log.Info("Client not found", "client", dexv1ALBAuth.Spec.Client)
 		if err := r.Update(ctx, dexv1ALBAuth); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{}, err
 	}
 
 	// Reconcile the secret
@@ -116,13 +118,16 @@ func (r *ALBAuthReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		log.Error(err, "unable to reconcile ingress", "client", dexv1Client.Name)
 		if client.IgnoreNotFound(err) == nil {
-			// ingress not found, ignore it
-			dexv1ALBAuth.Status.State = dexv1.PhaseNotFound
+			// ingress not found, set phase to not found
+			dexv1ALBAuth.Status.State = dexv1.PhaseFailed
+			if err := r.Update(ctx, dexv1ALBAuth); err != nil {
+				return ctrl.Result{}, err
+			}
 		} else {
 			return ctrl.Result{}, err
 		}
 	}
-	if dexv1ALBAuth.Status.State == dexv1.PhaseDeleting || dexv1ALBAuth.Status.State == dexv1.PhaseNotFound {
+	if dexv1ALBAuth.Status.State == dexv1.PhaseDeleting || dexv1ALBAuth.Status.State == dexv1.PhaseFailed {
 		// Remove our finalizer since we cleaned up
 		dexv1ALBAuth.ObjectMeta.Finalizers = removeString(dexv1ALBAuth.ObjectMeta.Finalizers, albFinalizer)
 	} else {
