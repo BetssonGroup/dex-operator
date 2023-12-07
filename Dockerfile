@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.14 as builder
+FROM --platform=$BUILDPLATFORM container-registry.test.betsson.tech/cache/library/golang:1.14 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -16,7 +16,14 @@ COPY controllers/ controllers/
 COPY pkg/ pkg/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o dex-operator main.go
+ARG TARGETOS
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -o dex-operator main.go
+
+# Use upx to reduce the docker image size
+FROM container-registry.test.betsson.tech/cache/hairyhenderson/upx:3.94 as upx
+COPY --from=builder /workspace/dex-operator /workspace/dex-operator
+RUN upx -9 /workspace/dex-operator
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
@@ -24,7 +31,7 @@ FROM gcr.io/distroless/static:nonroot
 ARG BUILD_DATE
 ARG SOURCE_COMMIT
 WORKDIR /
-COPY --from=builder /workspace/dex-operator .
+COPY --from=upx /workspace/dex-operator .
 USER nonroot:nonroot
 
 ENTRYPOINT ["/dex-operator"]
