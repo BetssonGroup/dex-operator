@@ -1,7 +1,8 @@
 # Image URL to use all building/pushing image targets
 CRD_GROUP ?= dex.betssongroup.com
 IMG ?= "quay.io/betsson-oss/dex-operator"
-TAG=$(shell git symbolic-ref -q --short HEAD||git rev-parse -q --short HEAD)
+# TAG=$(shell git symbolic-ref -q --short HEAD||git rev-parse -q --short HEAD)
+TAG=$(shell git rev-parse --short -q HEAD)
 GIT_SHA1=$(shell git rev-parse -q HEAD)
 BUILD_DATE=$(shell date +%FT%T%Z)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -89,6 +90,27 @@ docker-push:
 ifeq ($(TAG),master)
 	docker tag ${IMG}:${TAG}  ${IMG}:latest
 	docker push ${IMG}:latest
+endif
+
+docker-multi-arch:
+	@echo "Building ${TAG}"
+
+
+ifeq ($(TAG),master)
+	docker buildx build --platform="linux/amd64,linux/arm64" \
+	--build-arg SOURCE_COMMIT=${GIT_SHA1} \
+	--build-arg BUILD_DATE=${BUILD_DATE} \
+	-t ${IMG}:${TAG} \
+	-t ${IMG}:latest \
+	. \
+	--push
+else
+	docker buildx build --platform="linux/amd64,linux/arm64" \
+	--build-arg SOURCE_COMMIT=${GIT_SHA1} \
+	--build-arg BUILD_DATE=${BUILD_DATE} \
+	-t ${IMG}:${TAG} \
+	. \
+	--push
 endif
 
 kind-registry:
